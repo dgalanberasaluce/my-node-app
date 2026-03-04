@@ -9,7 +9,8 @@
     "start:mock": "USE_MOCKS=true BROKER_TYPE=mock node src/index.js",
     "start:real": "USE_MOCKS=false node src/index.js",
     "compose:up": "docker compose up -d",
-    "compose:down": "docker compose down"
+    "compose:down": "docker compose down",
+    "test": "USE_MOCKS=true NODE_ENV=test jest --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -30,7 +31,14 @@
     "uuid": "^13.0.0",
     "winston": "^3.19.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jest": "^29.6.1",
+    "supertest": "^6.4.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "verbose": true
+  },
   "pnpm": {
     "onlyBuiltDependencies": ["better-sqlite3"]
   }

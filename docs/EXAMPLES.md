@@ -118,6 +118,37 @@ y luego arranca la app (con mocks o con `USE_MOCKS=false` según prefieras). El 
 - Compose para servicios reales: `docker-compose.yml`
 - Rutas de ejemplo: `/example/*` (ver `src/routes/example.routes.js`)
 
+## Swagger UI (documentación OpenAPI)
+
+La aplicación expone una interfaz Swagger UI en `/docs` y el spec raw en
+`/docs/spec.json`.
+
+Probar manualmente:
+
+```bash
+# Levanta la aplicación con mocks
+USE_MOCKS=true pnpm run start:mock
+
+# Abrir en el navegador: http://localhost:3000/docs
+
+# O recuperar el spec JSON
+curl http://localhost:3000/docs/spec.json | jq .openapi
+```
+
+Probar automáticamente (test):
+
+1. Instala dependencias de desarrollo si no están instaladas:
+```bash
+pnpm install
+```
+2. Ejecuta los tests (el test de integración arranca la app en memoria con mocks):
+```bash
+pnpm test
+```
+
+El test comprueba que `/docs` responde HTML y que `/docs/spec.json` contiene
+la propiedad `openapi`.
+
 ---
 
 Si quieres, puedo añadir ejemplos de `curl` más compactos, o crear scripts de `Makefile`/`npm` para automatizar los pasos.
