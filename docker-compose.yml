@@ -39,7 +39,7 @@ services:
 
   # ── Kafka (KRaft mode — no Zookeeper required) ────────────────────────────
   kafka:
-    image: apache/kafka:3.9.2
+    image: apache/kafka:4.2.0
     restart: unless-stopped
     ports:
       - '9092:9092'
