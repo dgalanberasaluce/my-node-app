@@ -1,5 +1,6 @@
 const express = require('express');
 const routes = require('./routes');
+const requestLogger = require('./middlewares/requestLogger');
 const errorHandler = require('./middlewares/errorHandler');
 
 /**
@@ -11,6 +12,9 @@ const createApp = () => {
 
   // Built-in middleware
   app.use(express.json());
+
+  // Structured HTTP request logging + correlation ID injection
+  app.use(requestLogger);
 
   // Routes
   app.use(routes);
