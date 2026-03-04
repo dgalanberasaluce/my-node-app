@@ -24,8 +24,44 @@ pnpm start
 
 Endpoints
 - `GET /health` — devuelve estado y timestamp
-- `GET /api/hello` — saludo simple
-- `POST /api/echo` — devuelve el JSON recibido en el body
+- `GET /api/hello` — saludo simple (protegido con JWT)
+- `POST /api/echo` — devuelve el JSON recibido en el body (protegido con JWT)
+
+Auth y Users API
+- `POST /auth/register` — crea usuario y devuelve token
+	- body: `{ "name": "Ada", "email": "ada@example.com", "password": "secret123" }`
+- `POST /auth/login` — autentica usuario y devuelve token
+	- body: `{ "email": "ada@example.com", "password": "secret123" }`
+- `POST /auth/logout` — invalida token actual (requiere `Authorization: Bearer <token>`)
+- `GET /auth/me` — devuelve usuario autenticado (requiere token)
+- `GET /users` — lista usuarios (requiere token)
+- `GET /users/:id` — obtiene usuario por id (requiere token)
+- `PATCH /users/:id` — actualiza `name`, `email` y/o `password` (requiere token)
+- `DELETE /users/:id` — elimina usuario (requiere token)
+
+Notas de seguridad
+- Las contraseñas se almacenan hasheadas con `bcryptjs`.
+- Ningún endpoint devuelve el hash de contraseña.
+- Los tokens JWT revocados (logout) quedan en una blacklist en memoria y son rechazados.
+
+Quick usage (curl)
+```bash
+# 1) Register
+REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3000/auth/register \
+	-H "Content-Type: application/json" \
+	-d '{"name":"Ada","email":"ada@example.com","password":"secret123"}')
+
+TOKEN=$(echo "$REGISTER_RESPONSE" | node -p "const fs=require('fs'); JSON.parse(fs.readFileSync(0,'utf8')).token")
+
+# 2) Authenticated /auth/me
+curl -s http://localhost:3000/auth/me -H "Authorization: Bearer $TOKEN"
+
+# 3) List users
+curl -s http://localhost:3000/users -H "Authorization: Bearer $TOKEN"
+
+# 4) Logout (token gets revoked)
+curl -s -X POST http://localhost:3000/auth/logout -H "Authorization: Bearer $TOKEN"
+```
 
 Estructura del proyecto (resumen)
 - `src/index.js` — entry point (inicia servidor)
