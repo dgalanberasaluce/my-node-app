@@ -32,8 +32,8 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "jest": "^29.6.1",
-    "supertest": "^7.0.0"
+    "jest": "^29.6.4",
+    "supertest": "^7.1.4"
   },
   "jest": {
     "testEnvironment": "node",
