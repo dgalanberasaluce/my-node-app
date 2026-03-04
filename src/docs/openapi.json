@@ -1,0 +1,85 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "My Node App - Example API",
+    "version": "1.0.0",
+    "description": "Documentación OpenAPI generada para los endpoints disponibles en la aplicación de ejemplo. Muchas rutas son demostrativas y funcionan con mocks locales."
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Comprueba el estado de la API.",
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register user",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": { "201": { "description": "Created" } }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login user",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/example/public": {
+      "get": { "summary": "Public ping", "responses": { "200": { "description": "OK" } } }
+    },
+    "/example/protected": {
+      "get": {
+        "summary": "Protected (JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/example/cache": {
+      "post": {
+        "summary": "Set cache key (protected)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": { "201": { "description": "Created" } }
+      }
+    },
+    "/example/cache/{key}": {
+      "get": {
+        "summary": "Get cache key (protected)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "key", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } }
+      },
+      "delete": {
+        "summary": "Delete cache key (protected)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "key", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/example/items": {
+      "get": { "summary": "List items (protected)", "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create item (protected)", "security": [{ "bearerAuth": [] }], "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } }, "responses": { "201": { "description": "Created" } } }
+    ,
+    "/example/items/{id}": {
+      "get": { "summary": "Get item", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } } },
+      "patch": { "summary": "Update item", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } }, "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } } },
+      "delete": { "summary": "Delete item", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not Found" } } }
+    ,
+    "/example/publish": {
+      "post": { "summary": "Publish message (protected)", "security": [{ "bearerAuth": [] }], "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } }, "responses": { "202": { "description": "Accepted" } } }
+    ,
+    "/example/messages/{topic}": {
+      "get": { "summary": "Inspect messages (mock only)", "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "topic", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "OK" }, "501": { "description": "Not Implemented" } } }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    }
+  }
+}

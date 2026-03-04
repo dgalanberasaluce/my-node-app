@@ -4,6 +4,7 @@ const apiRoutes = require('./api.routes');
 const authRoutes = require('./auth.routes');
 const usersRoutes = require('./users.routes');
 const exampleRoutes = require('./example.routes');
+const swaggerRoutes = require('./swagger.routes');
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use('/api', apiRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', usersRoutes);
 router.use('/example', exampleRoutes);
+router.use('/docs', swaggerRoutes);
 
 module.exports = router;
