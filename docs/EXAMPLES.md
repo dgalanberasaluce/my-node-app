@@ -1,16 +1,17 @@
-# Ejemplos para ejecutar la API localmente
 
-Este documento explica cómo probar la API de ejemplo tanto con mocks (sin Docker) como usando servicios reales mediante `docker compose`.
+# Examples for running the API locally
 
-Requisitos previos
+This document explains how to run and test the sample API either with built-in mocks (no Docker) or using real services via `docker compose`.
 
-- Node.js y pnpm instalados.
-- (Opcional) `curl` y `jq` para ejecutar ejemplos en la terminal.
-- (Opcional para servicios reales) `docker` y `docker compose`.
+Prerequisites
 
-1) Ejecutar con mocks (recomendado para desarrollo)
+- Node.js and pnpm installed.
+- (Optional) `curl` and `jq` for command-line examples.
+- (Optional for real services) `docker` and `docker compose`.
 
-- Copia el archivo de ejemplo de entorno y arranca la app en modo `mock`:
+1) Run with mocks (recommended for development)
+
+- Copy the example env file and start the app in mock mode:
 
 ```bash
 cp .env.example .env
@@ -18,137 +19,135 @@ pnpm install
 pnpm run start:mock
 ```
 
-- Endpoints útiles:
-  - Registro: `POST /auth/register` → body `{ "name","email","password" }` — devuelve `{ user, token }`
-  - Login:    `POST /auth/login`    → body `{ "email","password" }` — devuelve `{ user, token }`
+- Useful endpoints:
+  - Register: `POST /auth/register` → body `{ "name","email","password" }` — returns `{ user, token }`
+  - Login:    `POST /auth/login`    → body `{ "email","password" }` — returns `{ user, token }`
   - Public:   `GET /example/public`
-  - Protected:`GET /example/protected` (requiere `Authorization: Bearer <token>`)
-  - Cache:    `POST /example/cache` (body `{ key, value, ttl? }`) y `GET /example/cache/:key`
-  - Items:    CRUD en `/example/items` — demo con SQLite en memoria
+  - Protected:`GET /example/protected` (requires `Authorization: Bearer <token>`)
+  - Cache:    `POST /example/cache` (body `{ key, value, ttl? }`) and `GET /example/cache/:key`
+  - Items:    CRUD on `/example/items` — demo uses in-memory SQLite
   - Broker:   `POST /example/publish` (body `{ topic?, exchange?, routingKey?, payload }`)
-  - Inspect:  `GET /example/messages/:topic` — sólo disponible con broker mock
+  - Inspect:  `GET /example/messages/:topic` — only available with the mock broker
 
-- Ejemplo rápido (registro → uso del token):
+- Quick example (register → use token):
 
 ```bash
-# Registrarse y extraer token (requiere jq)
+# Register and extract token (requires jq)
 TOKEN=$(curl -s -X POST http://localhost:3000/auth/register \
   -H 'Content-Type: application/json' \
   -d '{"name":"Alice","email":"alice@example.com","password":"Secret123!"}' \
   | jq -r '.token')
 
-# Usar endpoint protegido
+# Call protected endpoint
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/example/protected
 
-# Guardar en cache
+# Save to cache
 curl -s -X POST http://localhost:3000/example/cache \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"key":"hello","value":"world","ttl":120}'
 
-# Leer cache
+# Read cache
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/example/cache/hello
 
-# Crear item en SQLite (in-memory)
+# Create item in SQLite (in-memory)
 curl -s -X POST http://localhost:3000/example/items \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"name":"My item","value":"42","meta":{"tag":"demo"}}'
 
-# Listar items
+# List items
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/example/items
 
-# Publicar mensaje (mock broker lo almacenará en memoria)
+# Publish message (mock broker stores it in memory)
 curl -s -X POST http://localhost:3000/example/publish \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"payload":{"event":"user.created","id":"123"}}'
 
-# Inspeccionar mensajes publicados (solo mock)
+# Inspect published messages (mock only)
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/example/messages/example.events
 ```
 
-Notas:
-- Con `USE_MOCKS=true` los servicios externos (Redis, broker, DB si está en memoria) corren en proceso. Es la forma más rápida para desarrollar y testear.
-- El token JWT devuelto por `/auth/register` y `/auth/login` tiene el formato `Authorization: Bearer <token>`.
+Notes:
+- With `USE_MOCKS=true` external services (Redis, broker, DB when in-memory) run inside the process. This is the fastest way to develop and test.
+- The JWT returned by `/auth/register` and `/auth/login` uses the `Authorization: Bearer <token>` format.
 
-2) Ejecutar con servicios reales (docker-compose)
+2) Run with real services (docker-compose)
 
-- Copia el `.env.example`, ajusta valores si lo deseas y levanta los servicios:
+- Copy `.env.example`, adjust values if needed, and bring up the services:
 
 ```bash
 cp .env.example .env
-# Opcional: editar .env y poner USE_MOCKS=false y BROKER_TYPE=rabbitmq (o kafka)
+# Optionally edit .env and set USE_MOCKS=false and BROKER_TYPE=rabbitmq (or kafka)
 pnpm run compose:up
 pnpm install
-# Ejecutar la app contra los servicios levantados
-USE_MOCKS=false BROKER_TYPE=rabbitmq REDIS_URL=redis://localhost:6379 \ 
+# Run the app against the running services
+USE_MOCKS=false BROKER_TYPE=rabbitmq REDIS_URL=redis://localhost:6379 \
   RABBITMQ_URL=amqp://guest:guest@localhost:5672 pnpm run start:real
 ```
 
-- Comprobar servicios:
+- Verify services:
   - Redis: `redis-cli -h localhost -p 6379 ping` → `PONG`
-  - RabbitMQ UI: abrir http://localhost:15672 (usuario `guest` / `guest`)
-  - Kafka: `localhost:9092` (puede requerir herramientas externas para inspección)
+  - RabbitMQ UI: open http://localhost:15672 (user `guest` / `guest`)
+  - Kafka: `localhost:9092` (may require external tools for inspection)
 
-- Usar la API igual que en la sección anterior (obtener token y llamar endpoints protegidos).
+- Use the API the same way as in the previous section (get a token and call protected endpoints).
 
-- Parar y limpiar:
+- Stop and clean up:
 
 ```bash
 pnpm run compose:down
 ```
 
-3) Persistencia SQLite en archivo
+3) Persisting SQLite to a file
 
-Si deseas que la base de datos SQLite persista entre reinicios, pon en `.env`:
+If you want SQLite to persist between restarts, set in `.env`:
 
 ```
 DB_FILE=./data/app.db
 ```
 
-y luego arranca la app (con mocks o con `USE_MOCKS=false` según prefieras). El archivo `data/app.db` se creará automáticamente.
+Then start the app (with mocks or `USE_MOCKS=false` as you prefer). The `data/app.db` file will be created automatically.
 
-4) Notas y solución de problemas
+4) Troubleshooting
 
-- Si `better-sqlite3` no compila en tu máquina (native build), puedes cambiar a `DB_FILE=:memory:` y usar mocks; la app funcionará sin el binario nativo para la mayoría de demos.
-- Si usas macOS con Apple Silicon y ves fallos de compilación, instala las herramientas de build (`python`, `make`, `gcc`) y acepta la ejecución de scripts de compilación en `pnpm` si se solicita.
-- Para depuración de mensajes y cache, usa los endpoints de inspección (`/example/messages/:topic`, `/example/cache/:key`) cuando estés con `USE_MOCKS=true`.
+- If `better-sqlite3` fails to build on your machine (native build), switch to `DB_FILE=:memory:` and use mocks; the app will work for most demos without the native binary.
+- On macOS/Apple Silicon, if you encounter build failures, install build tools (`python`, `make`, `gcc`) and allow build scripts during `pnpm` install.
+- For debugging messages and cache, use the inspection endpoints (`/example/messages/:topic`, `/example/cache/:key`) when running with `USE_MOCKS=true`.
 
-5) Recursos
+5) Resources
 
-- Archivo de configuración de ejemplo: `.env.example`
-- Compose para servicios reales: `docker-compose.yml`
-- Rutas de ejemplo: `/example/*` (ver `src/routes/example.routes.js`)
+- Example env file: `.env.example`
+- Compose for real services: `docker-compose.yml`
+- Example routes: `/example/*` (see `src/routes/example.routes.js`)
 
-## Swagger UI (documentación OpenAPI)
+## Swagger UI (OpenAPI documentation)
 
-La aplicación expone una interfaz Swagger UI en `/docs` y el spec raw en
-`/docs/spec.json`.
+The application exposes Swagger UI at `/docs` and the raw spec at `/docs/spec.json`.
 
-Probar manualmente:
+Manual check:
 
 ```bash
-# Levanta la aplicación con mocks
+# Start the app with mocks
 USE_MOCKS=true pnpm run start:mock
 
-# Abrir en el navegador: http://localhost:3000/docs
+# Open in browser: http://localhost:3000/docs
 
-# O recuperar el spec JSON
+# Or fetch the spec JSON
 curl http://localhost:3000/docs/spec.json | jq .openapi
 ```
 
-Probar automáticamente (test):
+Automated test:
 
-1. Instala dependencias de desarrollo si no están instaladas:
+1. Install dev dependencies if needed:
 ```bash
 pnpm install
 ```
-2. Ejecuta los tests (el test de integración arranca la app en memoria con mocks):
+2. Run tests (integration test starts the app in-memory with mocks):
 ```bash
 pnpm test
 ```
 
-El test comprueba que `/docs` responde HTML y que `/docs/spec.json` contiene
-la propiedad `openapi`.
+The test verifies that `/docs` returns HTML and that `/docs/spec.json` contains the `openapi` property.
 
 ---
 
-Si quieres, puedo añadir ejemplos de `curl` más compactos, o crear scripts de `Makefile`/`npm` para automatizar los pasos.
+If you want, I can add more compact `curl` snippets or create `Makefile`/npm scripts to automate these steps.

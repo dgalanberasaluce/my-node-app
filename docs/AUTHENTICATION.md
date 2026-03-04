@@ -1,52 +1,53 @@
-# Autenticación (JWT)
 
-Este proyecto incluye un middleware de autenticación basado en JWT para proteger las rutas bajo `/api`.
+# Authentication (JWT)
 
-Archivos relevantes
+This project includes a JWT-based authentication middleware that protects routes under `/api`.
 
-- `src/middlewares/auth.js` — middleware `authenticate`.
-- `src/routes/api.routes.js` — se aplica `router.use(authenticate)` para proteger `/api`.
-- `src/config/index.js` — exporta `JWT_SECRET` y `JWT_EXPIRES_IN`.
+Relevant files
 
-Comportamiento
+- `src/middlewares/auth.js` — `authenticate` middleware.
+- `src/routes/api.routes.js` — applies `router.use(authenticate)` to protect `/api`.
+- `src/config/index.js` — exports `JWT_SECRET` and `JWT_EXPIRES_IN`.
 
-- El middleware espera la cabecera `Authorization: Bearer <token>`.
-- Responde `401` cuando la cabecera falta o está mal formada.
-- Responde `403` cuando el token es inválido o ha expirado. El mensaje diferencia entre token inválido y token expirado.
-- En caso de éxito, el payload decodificado se adjunta en `req.user` y se invoca `next()`.
+Behavior
 
-Variables de entorno
+- The middleware expects the `Authorization: Bearer <token>` header.
+- Responds `401` when the header is missing or malformed.
+- Responds `403` when the token is invalid or expired. Messages distinguish between `Invalid token` and `Token has expired`.
+- On success, the decoded payload is attached to `req.user` and `next()` is called.
 
-- `JWT_SECRET` — secreto para firmar/verificar tokens (usar un valor seguro en producción).
-- `JWT_EXPIRES_IN` — duración por defecto (ej. `1h`).
+Environment variables
 
-Generar tokens (ejemplo)
+- `JWT_SECRET` — secret used to sign/verify tokens (use a secure value in production).
+- `JWT_EXPIRES_IN` — default token lifetime (e.g. `1h`).
+
+Generate tokens (example)
 
 ```bash
-# Genera un token firmado con el secreto por defecto de desarrollo
+# Generate a token signed with the default development secret
 node -e "const jwt=require('jsonwebtoken');console.log(jwt.sign({sub:'user1'},process.env.JWT_SECRET||'change-me-in-production',{expiresIn:'1h'}))"
 ```
 
-Ejemplo de uso con curl
+Curl example
 
 ```bash
 TOKEN=$(node -e "const jwt=require('jsonwebtoken');console.log(jwt.sign({sub:'user1'},'change-me-in-production',{expiresIn:'1h'}))")
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/hello
 ```
 
-Códigos de respuesta habituales
+Common response codes
 
-- `401` — cabecera `Authorization` ausente o mal formada.
-- `403` — token inválido o expirado. Mensajes: `Invalid token` o `Token has expired`.
-- `200` — token válido y acceso concedido.
+- `401` — `Authorization` header missing or malformed.
+- `403` — invalid or expired token.
+- `200` — valid token and access granted.
 
-Notas
+Notes
 
-- La ruta `GET /health` no está protegida por el middleware.
-- En producción, fija `JWT_SECRET` en el entorno y rota las claves según la política de seguridad de tu organización.
+- `GET /health` is public and not protected by the middleware.
+- In production, set `JWT_SECRET` via your environment or secret manager and rotate keys according to your security policy.
 
-Referencias internas
+Internal references
 
 - Middleware: `src/middlewares/auth.js`
-- Rutas protegidas: `src/routes/api.routes.js`
+- Protected routes: `src/routes/api.routes.js`
 - Config: `src/config/index.js`

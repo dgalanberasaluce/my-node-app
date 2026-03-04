@@ -1,60 +1,61 @@
-# Seguridad
 
-Este documento resume las decisiones y recomendaciones de seguridad para `my-node-app`.
+# Security
 
-## Principios generales
-- Mantener secretos fuera del repositorio y del control de versiones. Usar un gestor de secretos (Vault, AWS Secrets Manager, Azure Key Vault, etc.).
-- Fallar al arrancar si variables críticas no están definidas en producción.
-- Defender en profundidad: validación de entrada, autenticación robusta, logging seguro, y límites de tasa.
+This document summarizes security decisions and recommendations for `my-node-app`.
 
-## Variables de entorno importantes
-- `JWT_SECRET` — Obligatoria en `NODE_ENV=production`. No usar valores por defecto inseguros.
-- `JWT_EXPIRES_IN` — Tiempo de expiración del token (p. ej. `1h`).
-- `JWT_ISSUER`, `JWT_AUDIENCE` — Valores usados para validar tokens entrantes.
-- `REDIS_URL` — Si está definido, la lista de tokens revocados se almacena en Redis.
-- `PASSWORD_SALT_ROUNDS` — Factor de coste para `bcrypt` (configurable).
+## Principles
+- Keep secrets out of the repository and version control. Use a secrets manager (Vault, AWS Secrets Manager, Azure Key Vault, etc.).
+- Fail fast on startup if critical environment variables are missing in production.
+- Defense in depth: input validation, strong authentication, safe logging, and rate limiting.
+
+## Important environment variables
+- `JWT_SECRET` — required in `NODE_ENV=production`. Do not use insecure defaults.
+- `JWT_EXPIRES_IN` — token expiration (e.g. `1h`).
+- `JWT_ISSUER`, `JWT_AUDIENCE` — values used to validate incoming tokens.
+- `REDIS_URL` — when set, revoked tokens are stored in Redis.
+- `PASSWORD_SALT_ROUNDS` — bcrypt cost factor (configurable).
 
 ## JWT
-- Los tokens contienen solo claims mínimos: `sub` (identificador del usuario) y `jti` (JWT ID) para permitir revocación.
-- Al verificar un token se valida firma, algoritmo (`HS256` por defecto), `issuer` y `audience`.
-- Para mayor seguridad en entornos distribuidos, considerar el uso de algoritmos asimétricos (RS256) y rotación de claves con `kid`.
+- Tokens contain minimal claims: `sub` (user id) and `jti` (JWT ID) to allow revocation.
+- Token verification validates signature, algorithm (HS256 by default), `issuer` and `audience`.
+- For distributed systems consider asymmetric algorithms (RS256) and key rotation using `kid`.
 
-## Revocación de tokens (logout)
-- En entornos de desarrollo el proyecto usa una lista en memoria; en producción se debe usar `REDIS_URL` — el repositorio de tokens usa Redis con TTL.
-- La revocación expira automáticamente cuando caduca el token.
+## Token revocation (logout)
+- In development the project uses an in-memory revocation list; in production use `REDIS_URL` and Redis with TTL.
+- Revocations naturally expire when the token would have expired.
 
-## Contraseñas
-- Las contraseñas se almacenan usando `bcrypt`.
-- `PASSWORD_SALT_ROUNDS` debe definirse en entornos productivos (valor recomendado ≥12, balanceando coste/latencia).
+## Passwords
+- Passwords are stored using `bcrypt`.
+- Set `PASSWORD_SALT_ROUNDS` in production (recommended ≥12, balancing cost/latency).
 
-## Validación de entradas
-- Todos los endpoints de autenticación y actualización de recursos aplican validaciones básicas de formato y longitud.
-- Se recomienda añadir esquemas estrictos (por ejemplo `Joi` o `ajv`) para cada ruta y limitar el tamaño del body (`express.json({ limit: '1mb' })`).
+## Input validation
+- Authentication and resource update endpoints apply basic validation for format and length.
+- Consider adding strict schemas (e.g. `Joi` or `ajv`) per route and limit body size (`express.json({ limit: '1mb' })`).
 
-## Protección contra abusos
-- Se ha añadido `express-rate-limit` con límites estrictos en endpoints de auth (p. ej. 10 intentos/15min por IP).
-- Revisar y ajustar límites según tráfico y patrones reales.
+## Abuse protection
+- `express-rate-limit` is applied with strict limits on auth endpoints (e.g. 10 attempts / 15min per IP).
+- Adjust limits according to real traffic patterns.
 
-## Logging y privacidad
-- No registrar contraseñas ni tokens en texto plano. El logger redirige (redacts) campos sensibles (`password`, `token`, `authorization`, etc.).
-- Para errores 5xx en producción, la respuesta al cliente es genérica; el stack y detalles quedan en logs internos.
+## Logging and privacy
+- Do not log passwords or tokens in plaintext. The logger redacts sensitive fields (`password`, `token`, `authorization`, etc.).
+- For 5xx errors in production the client receives a generic message while details remain in internal logs.
 
-## Dependencias y parches
-- Ejecutar auditorías de dependencias regularmente (`pnpm audit`, SCA).
-- Mantener dependencias actualizadas y sus parches aplicados.
+## Dependencies and patches
+- Run regular dependency audits (`pnpm audit`, SCA) and keep dependencies up to date.
 
-## Despliegue y checklist previo a producción
-1. Asegurar que `JWT_SECRET` está configurado y gestionado por un vault.
-2. Definir `REDIS_URL` y confirmar conectividad si la app se ejecuta en más de una instancia.
-3. Ajustar `PASSWORD_SALT_ROUNDS` y probar latencia.
-4. Establecer `LOG_LEVEL=info` en producción y configurar colector de logs.
-5. Habilitar HTTPS y configurar políticas de CORS/Content Security Policy según el cliente.
+## Pre-production checklist
+1. Ensure `JWT_SECRET` is configured and managed by a secret manager.
+2. Set `REDIS_URL` and verify connectivity if the app runs across multiple instances.
+3. Tune `PASSWORD_SALT_ROUNDS` and test latency impact.
+4. Set `LOG_LEVEL=info` in production and configure a log collector.
+5. Enable HTTPS and configure CORS/Content Security Policy according to your client.
 
-## Incidentes y rotación
-- En caso de compromiso de `JWT_SECRET` o claves, rotar secretos y forzar revocación (añadir nueva validación de `kid` o cambiar `issuer`/`audience`).
+## Incidents & rotation
+- If `JWT_SECRET` or keys are compromised, rotate secrets and force revocation (consider adding `kid` validation or changing `issuer`/`audience`).
 
-## Contacto
-Reporta vulnerabilidades a los mantenedores del repositorio vía issues o canal seguro.
+## Reporting
+Report vulnerabilities to the repository maintainers via issues or a secure channel.
 
 ---
-Este fichero complementa la información técnica en el código y debe mantenerse sincronizado con los cambios de implementación.
+
+This file complements the implementation and should be kept in sync with code changes.

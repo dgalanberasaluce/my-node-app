@@ -1,54 +1,52 @@
-# my-node-app
 
-Pequeña API en Express, modularizada y configurada para usarse con `pnpm`.
+## my-node-app
 
-Requisitos
-- Node.js 18+ (o compatible)
+Lightweight Express API, modular and configured for `pnpm`.
+
+Requirements
+- Node.js 18+ (or compatible)
 - pnpm
 
-Instalación
+Installation
 ```bash
 pnpm install
 ```
 
 Scripts
-- `pnpm dev` — inicia con `nodemon` (recarga automática)
-- `pnpm start` — inicia con `node`
+- `pnpm dev` — starts the app in watch mode
+- `pnpm start` — starts the app with Node
 
-Ejecutar localmente
+Running locally
 ```bash
 pnpm dev
-# o
+# or
 pnpm start
 ```
 
 Endpoints
-- `GET /health` — devuelve estado y timestamp
-- `GET /api/hello` — saludo simple (protegido con JWT)
-- `POST /api/echo` — devuelve el JSON recibido en el body (protegido con JWT)
+- `GET /health` — returns service status and timestamp
+- `GET /api/hello` — simple greeting (JWT protected)
+- `POST /api/echo` — returns the JSON body (JWT protected)
 
-Auth y Users API
-- `POST /auth/register` — crea usuario y devuelve token
+Auth & Users API
+- `POST /auth/register` — creates a user and returns a token
 	- body: `{ "name": "Ada", "email": "ada@example.com", "password": "secret123" }`
-- `POST /auth/login` — autentica usuario y devuelve token
+- `POST /auth/login` — authenticates a user and returns a token
 	- body: `{ "email": "ada@example.com", "password": "secret123" }`
-- `POST /auth/logout` — invalida token actual (requiere `Authorization: Bearer <token>`)
-- `GET /auth/me` — devuelve usuario autenticado (requiere token)
-- `GET /users` — lista usuarios (requiere token)
-- `GET /users/:id` — obtiene usuario por id (requiere token)
-- `PATCH /users/:id` — actualiza `name`, `email` y/o `password` (requiere token)
-- `DELETE /users/:id` — elimina usuario (requiere token)
+- `POST /auth/logout` — revokes the current token (requires `Authorization: Bearer <token>`)
+- `GET /auth/me` — returns the authenticated user (requires token)
+- `GET /users` — list users (requires token)
+- `GET /users/:id` — get user by id (requires token)
+- `PATCH /users/:id` — update `name`, `email` and/or `password` (requires token)
+- `DELETE /users/:id` — delete a user (requires token)
 
-Notas de seguridad
-- Las contraseñas se almacenan hasheadas con `bcryptjs`.
-- Ningún endpoint devuelve el hash de contraseña.
- - Las contraseñas se almacenan hasheadas con `bcryptjs`.
- - Ningún endpoint devuelve el hash de contraseña.
- - Tokens JWT: ahora incluyen `jti` y se verifican `issuer`/`audience`. Evitamos incluir PII dentro del token.
- - Revocación de tokens (logout): en producción la lista de revocación utiliza Redis (`REDIS_URL`) con TTL; en desarrollo se mantiene una versión en memoria.
- - Se han añadido medidas de endurecimiento: `helmet`, CORS configurable, `express-rate-limit` en endpoints de auth y límites de tamaño de body.
+Security notes
+- Passwords are hashed using `bcryptjs` and never returned by endpoints.
+- JWT tokens include `jti` and are validated for `issuer`/`audience`.
+- Token revocation (logout) uses Redis (`REDIS_URL`) with TTL in production and an in-memory list in development.
+- The app includes hardening: `helmet`, configurable CORS`, `express-rate-limit` on auth endpoints and request size limits.
 
-Para más detalles y la guía de despliegue seguro, ver [docs/SECURITY.md](docs/SECURITY.md).
+See `docs/SECURITY.md` for deployment and hardening guidance.
 
 Quick usage (curl)
 ```bash
@@ -69,45 +67,46 @@ curl -s http://localhost:3000/users -H "Authorization: Bearer $TOKEN"
 curl -s -X POST http://localhost:3000/auth/logout -H "Authorization: Bearer $TOKEN"
 ```
 
-Estructura del proyecto (resumen)
-- `src/index.js` — entry point (inicia servidor)
-- `src/app.js` — fábrica de Express (configura middlewares y rutas)
-- `src/config/` — configuración centralizada
-- `src/controllers/` — controladores (lógica por ruta)
-- `src/routes/` — definición y agregación de routers
-- `src/middlewares/` — middlewares compartidos (p.ej. manejo de errores)
+Project structure (summary)
+- `src/index.js` — entry point (starts the server)
+- `src/app.js` — Express app factory (configures middlewares and routes)
+- `src/config/` — centralized configuration
+- `src/controllers/` — route handlers
+- `src/routes/` — router definitions and aggregation
+- `src/middlewares/` — shared middlewares (e.g. error handler)
 
-Contribuir
-- Haz `git add .` y `git commit -m "mensaje"` para cambios locales.
+Contributing
+- Stage changes and commit with a descriptive message, e.g.:
 
-Licencia
+```bash
+git add .
+git commit -m "feat: add example"
+```
+
+License
 - MIT
 
 Logging
 -------
 
-Este proyecto utiliza un sistema de logging estructurado con `winston` y
-propagación de `correlationId` por request usando `AsyncLocalStorage`.
+This project uses structured logging with `winston` and propagates a `correlationId`
+per request using `AsyncLocalStorage`.
 
-Puntos clave
+Key points
 
-- Correlation ID: si el cliente envía la cabecera `X-Correlation-Id`, se
-	reutiliza; si no, el servicio genera un UUID por request. El valor se expone
-	en la cabecera de respuesta `X-Correlation-Id`.
-- Formato: en `NODE_ENV=production` los logs salen en JSON (útil para
-	agregadores). En desarrollo se usa un formato coloreado y legible.
-- Metadata fija: cada entrada incluye `service`, `version` y `environment`.
-- Niveles: `http` para 2xx, `warn` para 4xx, `error` para 5xx. `LOG_LEVEL` es
-	configurable vía variable de entorno.
+- Correlation ID: if the client sends `X-Correlation-Id` it will be reused; otherwise the service generates a UUID per request and returns it as `X-Correlation-Id`.
+- Format: in `production` logs are emitted as JSON (compatible with log collectors). In development logs are colorized for readability.
+- Fixed metadata: each entry includes `service`, `version` and `environment`.
+- Levels: `http` for 2xx, `warn` for 4xx, `error` for 5xx. `LOG_LEVEL` is configurable via env var.
 
-Variables de entorno relevantes
+Environment variables
 
 - `NODE_ENV` — `development`/`production`
-- `LOG_LEVEL` — nivel mínimo de logs (`debug`, `info`, `warn`, `error`, ...)
+- `LOG_LEVEL` — minimum log level (`debug`, `info`, `warn`, `error`, ...)
 
-Ejemplos de uso
+Examples
 
-1) Logging en un controlador:
+1) Logging from a controller:
 
 ```javascript
 const { logger } = require('../logger');
@@ -115,24 +114,23 @@ const { logger } = require('../logger');
 function createUser(req, res) {
 	const { username } = req.body;
 	logger.info('creating user', { username });
-	// ... lógica
+	// ... logic
 	res.status(201).json({ ok: true });
 }
 ```
 
-2) Incluir metadata adicional y errores:
+2) Include extra metadata and errors:
 
 ```javascript
 try {
-	// operación que puede fallar
+	// operation that may fail
 } catch (err) {
 	logger.error('failed to do operation', { error: err.message, stack: err.stack });
-	throw err; // o manejar según corresponda
+	throw err;
 }
 ```
 
-3) Obtener el `correlationId` desde cualquier lugar en la pila (para incluirlo
-	 en logs o payloads):
+3) Obtain the `correlationId` from anywhere in the stack (for logs or payloads):
 
 ```javascript
 const { requestContext } = require('../logger');
@@ -140,7 +138,7 @@ const store = requestContext.getStore();
 const correlationId = store && store.correlationId;
 ```
 
-Formato de ejemplo (producción - JSON):
+Example log (production JSON):
 
 ```json
 {
@@ -158,13 +156,9 @@ Formato de ejemplo (producción - JSON):
 }
 ```
 
-Recomendaciones para producción
+Production recommendations
 
-- Enviar logs a un colector/stack (Datadog, Loki, ELK, CloudWatch). Como los
-	logs son JSON en `production`, son fácilmente ingeribles por dichos sistemas.
-- Fijar `LOG_LEVEL` a `info` o `warn` en producción para reducir ruido.
-- Asegurar que los microservicios en la cadena acepten y re-pasen `X-Correlation-Id`
-	para traza distribuida completa.
+- Send logs to a collector (Datadog, Loki, ELK, CloudWatch). JSON logs in `production` are easily ingested by those systems.
+- Set `LOG_LEVEL=info` or `warn` in production to reduce noise.
+- Ensure upstream services preserve and forward `X-Correlation-Id` for full distributed tracing.
 
-¿Quieres que añada ejemplos de integración con un colector (p.ej. enviarlos a
-Logstash o Datadog), o que agregue un badge que muestre el nivel de `LOG_LEVEL`?
