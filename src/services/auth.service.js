@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config');
+const ms = require('ms');
+const { v4: uuidv4 } = require('uuid');
+const { JWT_SECRET, JWT_EXPIRES_IN, JWT_ISSUER, JWT_AUDIENCE, PASSWORD_SALT_ROUNDS } = require('../config');
 const usersRepository = require('../repositories/users.repository');
 const tokenBlacklistRepository = require('../repositories/tokenBlacklist.repository');
 const { toPublicUser } = require('./users.service');
-
-const PASSWORD_SALT_ROUNDS = 10;
 
 const createError = (status, message) => {
   const error = new Error(message);
@@ -15,13 +15,16 @@ const createError = (status, message) => {
 
 const createAccessToken = (user) =>
   jwt.sign(
-    {
-      sub: user.id,
-      email: user.email,
-      name: user.name,
-    },
+    // Keep the payload minimal: avoid embedding PII (email, name) in the token.
+    // `jti` (JWT ID) provides a unique revocable identifier per token.
+    { sub: user.id, jti: uuidv4() },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    {
+      expiresIn: JWT_EXPIRES_IN,
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+      algorithm: 'HS256',
+    }
   );
 
 const register = async ({ name, email, password }) => {
@@ -62,9 +65,14 @@ const login = async ({ email, password }) => {
   };
 };
 
-const logout = (token, payload) => {
-  const expiresAt = payload && payload.exp ? payload.exp * 1000 : Date.now();
-  tokenBlacklistRepository.revoke(token, expiresAt);
+const logout = async (token, payload) => {
+  // If the token carries an exp claim use it; otherwise fall back to
+  // JWT_EXPIRES_IN so the black-list entry lives as long as the token would.
+  const expiresAt =
+    payload && payload.exp
+      ? payload.exp * 1000
+      : Date.now() + (ms(JWT_EXPIRES_IN) || 3_600_000);
+  await tokenBlacklistRepository.revoke(token, expiresAt);
 };
 
 const getCurrentUser = (userId) => {

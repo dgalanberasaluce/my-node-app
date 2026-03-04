@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const usersRepository = require('../repositories/users.repository');
-
-const PASSWORD_SALT_ROUNDS = 10;
+const { PASSWORD_SALT_ROUNDS } = require('../config');
 
 const createError = (status, message) => {
   const error = new Error(message);

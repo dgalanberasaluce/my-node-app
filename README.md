@@ -42,7 +42,13 @@ Auth y Users API
 Notas de seguridad
 - Las contraseñas se almacenan hasheadas con `bcryptjs`.
 - Ningún endpoint devuelve el hash de contraseña.
-- Los tokens JWT revocados (logout) quedan en una blacklist en memoria y son rechazados.
+ - Las contraseñas se almacenan hasheadas con `bcryptjs`.
+ - Ningún endpoint devuelve el hash de contraseña.
+ - Tokens JWT: ahora incluyen `jti` y se verifican `issuer`/`audience`. Evitamos incluir PII dentro del token.
+ - Revocación de tokens (logout): en producción la lista de revocación utiliza Redis (`REDIS_URL`) con TTL; en desarrollo se mantiene una versión en memoria.
+ - Se han añadido medidas de endurecimiento: `helmet`, CORS configurable, `express-rate-limit` en endpoints de auth y límites de tamaño de body.
+
+Para más detalles y la guía de despliegue seguro, ver [docs/SECURITY.md](docs/SECURITY.md).
 
 Quick usage (curl)
 ```bash
