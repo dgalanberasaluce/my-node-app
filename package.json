@@ -4,7 +4,7 @@
   "description": "Simple Express API",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
+    "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "start:mock": "USE_MOCKS=true BROKER_TYPE=mock node src/index.js",
     "start:real": "USE_MOCKS=false node src/index.js",
@@ -29,9 +29,7 @@
     "uuid": "^13.0.0",
     "winston": "^3.19.0"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.3"
-  },
+  "devDependencies": {},
   "pnpm": {
     "onlyBuiltDependencies": ["better-sqlite3"]
   }
