@@ -34,8 +34,7 @@
   "vulnerabilityAlerts": {
     "labels": ["security"],
     "automerge": true,
-    "schedule": ["at any time"],
-    "prPriority": 10
+    "schedule": ["at any time"]
   },
 
   "packageRules": [
@@ -102,6 +101,12 @@
       "prBodyNotes": [
         "⚠️ **Native addon**: run `pnpm rebuild better-sqlite3` after merging."
       ]
+    },
+    {
+      "description": "Priority for vulnerability alerts",
+      "matchPackagePatterns": ["*"],
+      "labels": ["security"],
+      "prPriority": 10
     }
   ],
 
