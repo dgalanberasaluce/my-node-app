@@ -8,54 +8,72 @@
     "group:recommended",
     "helpers:pinGitHubActionDigests"
   ],
-
   "timezone": "Europe/Madrid",
-  "schedule": ["before 6am on Monday"],
-
-  "labels": ["dependencies"],
+  "schedule": [
+    "before 6am on Monday"
+  ],
+  "labels": [
+    "dependencies"
+  ],
   "reviewers": [],
   "assignees": [],
-
   "prConcurrentLimit": 5,
   "prHourlyLimit": 2,
   "branchConcurrentLimit": 10,
-
   "rangeStrategy": "bump",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on the first day of the month"],
+    "schedule": [
+      "before 6am on the first day of the month"
+    ],
     "commitMessageAction": "refresh",
     "automerge": true
   },
-
   "vulnerabilityAlerts": {
-    "labels": ["security"],
+    "labels": [
+      "security"
+    ],
     "automerge": true,
-    "schedule": ["at any time"]
+    "schedule": [
+      "at any time"
+    ]
   },
-
   "packageRules": [
     {
       "description": "Automerge non-major devDependencies",
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
     },
     {
       "description": "Require review for all major updates",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false,
-      "labels": ["dependencies", "major-update"],
+      "labels": [
+        "dependencies",
+        "major-update"
+      ],
       "prPriority": 5
     },
     {
       "description": "Group Jest ecosystem updates",
-      "matchPackageNames": ["jest", "supertest", "@types/jest", "ts-jest"],
+      "matchPackageNames": [
+        "jest",
+        "supertest",
+        "@types/jest",
+        "ts-jest"
+      ],
       "groupName": "jest ecosystem",
       "automerge": true
     },
@@ -72,48 +90,69 @@
     },
     {
       "description": "Group messaging clients (Kafka, RabbitMQ, Redis)",
-      "matchPackageNames": ["kafkajs", "amqplib", "ioredis"],
+      "matchPackageNames": [
+        "kafkajs",
+        "amqplib",
+        "ioredis"
+      ],
       "groupName": "messaging & cache clients"
     },
     {
       "description": "Group auth/crypto packages",
-      "matchPackageNames": ["bcryptjs", "jsonwebtoken", "uuid"],
+      "matchPackageNames": [
+        "bcryptjs",
+        "jsonwebtoken",
+        "uuid"
+      ],
       "groupName": "auth & crypto"
     },
     {
       "description": "Patch updates for production deps – automerge after CI",
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["patch"],
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
     },
     {
       "description": "Pin Node.js major version to current LTS (22)",
-      "matchPackageNames": ["node"],
+      "matchPackageNames": [
+        "node"
+      ],
       "allowedVersions": "^22.0.0"
     },
     {
       "description": "better-sqlite3 requires native rebuild – review carefully",
-      "matchPackageNames": ["better-sqlite3"],
+      "matchPackageNames": [
+        "better-sqlite3"
+      ],
       "automerge": false,
-      "labels": ["dependencies", "native-addon"],
+      "labels": [
+        "dependencies",
+        "native-addon"
+      ],
       "prBodyNotes": [
         "⚠️ **Native addon**: run `pnpm rebuild better-sqlite3` after merging."
       ]
     },
     {
       "description": "Priority for vulnerability alerts",
-      "matchPackagePatterns": ["*"],
-      "labels": ["security"],
-      "prPriority": 10
+      "labels": [
+        "security"
+      ],
+      "prPriority": 10,
+      "matchPackageNames": [
+        "*"
+      ]
     }
   ],
-
-  "node": {
+  "travis": {
     "enabled": true
   },
-
   "commitMessagePrefix": "chore(deps):",
   "commitMessageAction": "update",
   "commitMessageTopic": "{{depName}}",
