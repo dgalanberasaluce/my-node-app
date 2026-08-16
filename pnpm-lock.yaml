@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       amqplib:
-        specifier: ^1.0.3
-        version: 1.0.3
+        specifier: ^1.0.7
+        version: 1.2.0
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -537,8 +537,8 @@ packages:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
     engines: {node: '>= 0.6'}
 
-  amqplib@1.0.3:
-    resolution: {integrity: sha512-nsrXa59tvX4HPjPPW8JJGuBb/Db0MOq3DOhGdSbIY7bTsQDMV2fmF9c3i74g/8Gt9+QWyrxfEPppOOoV9lK1uQ==}
+  amqplib@1.2.0:
+    resolution: {integrity: sha512-WVvkHAaL848/zjpJXXnN/80nPhCrwxlXWQFHTRDjbEGkwaKK+Ht+8iAC4LeKEzQTOJKxNnUGVLNy/70iFHkeEg==}
     engines: {node: '>=18'}
 
   ansi-escapes@4.3.2:
@@ -2498,7 +2498,7 @@ snapshots:
       mime-types: 3.0.2
       negotiator: 1.0.0
 
-  amqplib@1.0.3:
+  amqplib@1.2.0:
     dependencies:
       buffer-more-ints: 1.0.0
 
