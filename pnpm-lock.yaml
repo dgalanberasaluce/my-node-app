@@ -45,8 +45,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(express@5.2.1(supports-color@8.1.1))
       uuid:
-        specifier: ^13.0.0
-        version: 13.0.0
+        specifier: ^13.0.2
+        version: 13.0.2
       winston:
         specifier: ^3.19.0
         version: 3.19.0
@@ -1853,8 +1853,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  uuid@13.0.0:
-    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+  uuid@13.0.2:
+    resolution: {integrity: sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==}
     hasBin: true
 
   v8-to-istanbul@9.3.0:
@@ -4021,7 +4021,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  uuid@13.0.0: {}
+  uuid@13.0.2: {}
 
   v8-to-istanbul@9.3.0:
     dependencies:
